@@ -19,6 +19,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import {
+  css,
   ensureIsArray,
   FeatureFlag,
   isFeatureEnabled,
@@ -232,16 +233,44 @@ class Chart extends React.PureComponent {
     );
   }
 
+  renderSpinner(chartStatus, databaseName) {
+    const messages = {
+      // TODO(betodealmeida): show database name
+      loading: t(`Fetching data from ${databaseName}`),
+      success: t('Rendering chart'),
+      rendered: t('Success'),
+    };
+
+    return (
+      <div>
+        <Loading position="inline-centered" />
+        <span
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          css={css`
+            display: block;
+            margin: 16px auto;
+            width: fit-content;
+            color: #666666;
+          `}
+        >
+          {messages[chartStatus]}
+        </span>
+      </div>
+    );
+  }
+
   render() {
     const {
       height,
       chartAlert,
       chartStatus,
+      datasource,
       errorMessage,
       chartIsStale,
       queriesResponse = [],
       width,
     } = this.props;
+    const databaseName = datasource?.database?.name;
 
     const isLoading = chartStatus === 'loading';
     this.renderContainerStartTime = Logger.getTimestamp();
@@ -310,7 +339,7 @@ class Chart extends React.PureComponent {
               <Loading />
             )}
           </div>
-          {isLoading && <Loading />}
+          {isLoading && this.renderSpinner(chartStatus, databaseName)}
         </Styles>
       </ErrorBoundary>
     );
